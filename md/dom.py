@@ -17,6 +17,15 @@ class DOM:
         # The DOM element tree
         self.content = [] # type: List[Element]
 
+    def parse(self, input: str) -> None:
+        """Parse the input Markdown and append to this DOM"""
+        log.info('parsing...')
+        input = [input.strip()]
+        for elementType in _ELEMENTS:
+            input = elementType.parse(input)
+        self.content += input
+        log.debug('parsed: %r', self)
+
     def __str__(self):
         return self.content.__str__()
 
