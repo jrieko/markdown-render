@@ -80,4 +80,4 @@ class TestDOM(unittest.TestCase):
         subject = md.dom.DOM()
         subject.parse("\n".join(input))
         self.assertEqual(len(subject.content), 2)
-        self.assertEqual(subject.content, md.dom.ParagraphElement.parse(input))
+        self.assertEqual(subject.content, md.dom.HeadingElement.parse(input))

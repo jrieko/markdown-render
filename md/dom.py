@@ -3,6 +3,7 @@ from typing import Union, List
 import collections.abc
 import logging
 import re
+import yattag
 
 
 log = logging.getLogger(__name__)
@@ -26,11 +27,21 @@ class DOM:
         self.content += input
         log.debug('parsed: %r', self)
 
+    def render(self) -> yattag.Doc:
+        """Render this DOM to HTML"""
+        log.info('rendering...')
+        doc = yattag.Doc()
+        for element in self.content:
+            element.render(doc)
+        log.debug('rendered: %r', doc)
+        return doc
+
     def __str__(self):
         return self.content.__str__()
 
     def __repr__(self):
         return '<{0}{1}>'.format(self.__class__.__qualname__, self.__dict__)
+
 
 class Parsable(ABC):
     @classmethod
@@ -69,7 +80,18 @@ class Parsable(ABC):
                 output.append(item)
         return output
 
-class Text(Parsable):
+
+class Renderable(ABC):
+    @abstractmethod
+    def render(self, doc: yattag.Doc) -> None:
+        """Render this object to HTML"""
+        pass
+
+    def __repr__(self):
+        return '<{0}{1}>'.format(self.__class__.__qualname__, self.__dict__)
+
+
+class Text(Parsable, Renderable):
     """A text value"""
     _PATTERN = re.compile(r'(.+)', re.DOTALL) # match until end of input
 
@@ -80,11 +102,16 @@ class Text(Parsable):
     def pattern(cls) -> re.Pattern:
         return cls._PATTERN
 
+    def render(self, doc: yattag.Doc) -> None:
+        """Render this value to HTML"""
+        doc.text(self.text)
+
     def __eq__(self, other):
         return self is other or (
             type(self) == type(other) and self.text == other.text)
 
-class Link(Parsable):
+
+class Link(Parsable, Renderable):
     """A hyperlink"""
     _PATTERN = re.compile(r'''\[(.*?)\]    # the link text
                               \((.+?)\)     # the link target''', re.X)
@@ -97,16 +124,28 @@ class Link(Parsable):
     def pattern(cls) -> re.Pattern:
         return cls._PATTERN
 
+    def render(self, doc: yattag.Doc) -> None:
+        """Render this value to HTML"""
+        with doc.tag('a', href=self.target):
+            if self.text:
+                doc.text(self.text)
+
     def __eq__(self, other):
         return self is other or (
             type(self) == type(other) and 
             self.target == other.target and self.text == other.text)
 
-class Element:
+
+class Element(Renderable):
     def __init__(self, value):
         super().__init__()
         self.values = []
         self._parse_inline(value)
+
+    def render(self, doc: yattag.Doc) -> None:
+        """Render this element to HTML"""
+        for value in self.values:
+            value.render(doc)
 
     def _parse_inline(self, input: str):
         input = [input.strip()]
@@ -118,7 +157,8 @@ class Element:
         return self is other or (
             type(self) == type(other) and self.values == other.values)
 
-class HeadingElement(Element, Parsable):
+
+class HeadingElement(Element, Parsable, Renderable):
     _MAX_LEVEL = 6
     _PATTERN = re.compile(
         r'^' # start of line only
@@ -134,12 +174,17 @@ class HeadingElement(Element, Parsable):
     def pattern(cls) -> re.Pattern:
         return cls._PATTERN
 
+    def render(self, doc: yattag.Doc):
+        with doc.tag('h'+str(self.level)):
+            super().render(doc)
+
     def __eq__(self, other):
         return self is other or (
             type(self) == type(other) and super().__eq__(other) 
             and self.level == other.level)
 
-class ParagraphElement(Element, Parsable):
+
+class ParagraphElement(Element, Parsable, Renderable):
     _PATTERN = re.compile(
         r'\A' # start of input only
         r'(.+?)(?:\n{2,}|\Z)', # match until >= 2 newlines or end of input
@@ -152,8 +197,12 @@ class ParagraphElement(Element, Parsable):
     def pattern(cls) -> re.Pattern:
         return cls._PATTERN
 
+    def render(self, doc: yattag.Doc):
+        with doc.tag('p'):
+            super().render(doc)
+
 
 # Top-level elements, in order of parsing precedence
-_ELEMENTS = [ParagraphElement]
+_ELEMENTS = [HeadingElement, ParagraphElement]
 # Inline elements, in order of parsing precedence
-_INLINES = [Text]
+_INLINES = [Link, Text]
