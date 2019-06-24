@@ -7,7 +7,8 @@ Requirements:
 - [pipenv](https://pipenv.readthedocs.io)
 
 ```sh
-pipenv udpate
+pip install pipenv
+pipenv install
 ```
 
 Then:
