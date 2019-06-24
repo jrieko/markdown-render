@@ -18,6 +18,17 @@ class TestParagraphElement(unittest.TestCase):
         self.assertEqual(subjects[0].values, [md.dom.Text(["Test text"])])
         self.assertEqual(subjects[1].values, [md.dom.Text(["Line 2"])])
 
+class TestLink(unittest.TestCase):
+    def test_parse_empty(self):
+        input = ["[]()"]
+        output = md.dom.Link.parse(input.copy())
+        self.assertEqual(output, input)
+
+    def test_parse(self):
+        subject = md.dom.Link.parse(["[text](target)"])[0]
+        self.assertEqual(subject.text, "text")
+        self.assertEqual(subject.target, "target")
+
 class TestDOM(unittest.TestCase):
     def test_parse_empty(self):
         subject = md.dom.DOM()

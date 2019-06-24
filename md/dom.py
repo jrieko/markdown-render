@@ -84,6 +84,24 @@ class Text(Parsable):
         return self is other or (
             type(self) == type(other) and self.text == other.text)
 
+class Link(Parsable):
+    """A hyperlink"""
+    _PATTERN = re.compile(r'''\[(.*?)\]    # the link text
+                              \((.+?)\)     # the link target''', re.X)
+
+    def __init__(self, match: List[str]):
+        self.target = match[1]
+        self.text = match[0] if match[0] else None
+
+    @classmethod
+    def pattern(cls) -> re.Pattern:
+        return cls._PATTERN
+
+    def __eq__(self, other):
+        return self is other or (
+            type(self) == type(other) and 
+            self.target == other.target and self.text == other.text)
+
 class Element:
     def __init__(self, value):
         super().__init__()
