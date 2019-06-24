@@ -12,6 +12,7 @@ pipenv udpate
 
 Then:
 - unit tests: `pipenv run python -m unittest`
+- as a shell command: `pipenv run python main.py -h`
 
 # Implement a Markdown => HTML converter
 
