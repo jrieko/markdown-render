@@ -1,5 +1,18 @@
 This is my implementation of the following exercise.
 
+# Usage
+
+Requirements:
+- Python 3
+- [pipenv](https://pipenv.readthedocs.io)
+
+```sh
+pipenv udpate
+```
+
+Then:
+- unit tests: `pipenv run python -m unittest`
+
 # Implement a Markdown => HTML converter
 
 Markdown is a simple syntax used to generate formatted text. It’s used in lots
