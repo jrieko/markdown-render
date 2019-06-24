@@ -2,6 +2,43 @@ import unittest
 import md.dom
 import io
 
+class TestHeadingElement(unittest.TestCase):
+    def test_parse_1(self):
+        subject = md.dom.HeadingElement.parse(["# Test"])[0]
+        self.assertEqual(subject.level, 1)
+        self.assertEqual(subject.values, [md.dom.Text(["Test"])])
+
+    def test_parse_2(self):
+        subject = md.dom.HeadingElement.parse(["## Test"])[0]
+        self.assertEqual(subject.level, 2)
+        self.assertEqual(subject.values, [md.dom.Text(["Test"])])
+
+    def test_parse_3(self):
+        subject = md.dom.HeadingElement.parse(["### Test"])[0]
+        self.assertEqual(subject.level, 3)
+        self.assertEqual(subject.values, [md.dom.Text(["Test"])])
+
+    def test_parse_4(self):
+        subject = md.dom.HeadingElement.parse(["#### Test"])[0]
+        self.assertEqual(subject.level, 4)
+        self.assertEqual(subject.values, [md.dom.Text(["Test"])])
+
+    def test_parse_5(self):
+        subject = md.dom.HeadingElement.parse(["##### Test"])[0]
+        self.assertEqual(subject.level, 5)
+        self.assertEqual(subject.values, [md.dom.Text(["Test"])])
+
+    def test_parse_6(self):
+        subject = md.dom.HeadingElement.parse(["###### Test"])[0]
+        self.assertEqual(subject.level, 6)
+        self.assertEqual(subject.values, [md.dom.Text(["Test"])])
+
+    def test_parse_7(self):
+        """test compliance with HTML spec max heading level of 6"""
+
+        subject = md.dom.HeadingElement.parse(["####### Test"])[0]
+        self.assertEqual(subject.level, 6)
+        self.assertEqual(subject.values, [md.dom.Text(["# Test"])])
 
 class TestParagraphElement(unittest.TestCase):
     def test_parse(self):

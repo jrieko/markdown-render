@@ -118,6 +118,27 @@ class Element:
         return self is other or (
             type(self) == type(other) and self.values == other.values)
 
+class HeadingElement(Element, Parsable):
+    _MAX_LEVEL = 6
+    _PATTERN = re.compile(
+        r'^' # start of line only
+        r'(#{1,'+str(_MAX_LEVEL)+r'})' # heading level
+        r'(.*)', # heading text
+        re.MULTILINE)
+
+    def __init__(self, match: List[str]):
+        super().__init__(match[1])
+        self.level = len(match[0])
+
+    @classmethod
+    def pattern(cls) -> re.Pattern:
+        return cls._PATTERN
+
+    def __eq__(self, other):
+        return self is other or (
+            type(self) == type(other) and super().__eq__(other) 
+            and self.level == other.level)
+
 class ParagraphElement(Element, Parsable):
     _PATTERN = re.compile(
         r'\A' # start of input only
