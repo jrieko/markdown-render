@@ -1,5 +1,7 @@
 This is my implementation of the following exercise.
 
+[![Build Status](https://travis-ci.org/jrieko/markdown-render.svg?branch=develop)](https://travis-ci.org/jrieko/markdown-render)
+
 # Usage
 
 Requirements:
